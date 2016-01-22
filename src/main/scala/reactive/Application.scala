@@ -2,14 +2,14 @@ package reactive
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ HttpResponse, HttpRequest }
+import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.http.scaladsl.server.Directives._
+import akka.util.ByteString
 
 import scala.io.StdIn
 import scala.util.Try
-
 
 object Application extends App {
   implicit val system = ActorSystem()
@@ -28,6 +28,13 @@ object Application extends App {
 
 
   val route =
+    path("stream") {
+      complete {
+        HttpResponse(
+          entity = HttpEntity(ContentTypes.`text/plain(UTF-8)`, SlowNumerable.source.map(n => ByteString(s"$n\n")))
+        )
+      }
+    } ~
     path(IntNumber) { n =>
       get {
         complete {
